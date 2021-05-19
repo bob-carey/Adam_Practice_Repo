@@ -56,7 +56,7 @@ ui <- list(
           tabName = "overview",
           withMathJax(),
           h1("Baby Names App"),
-          img(src='baby.jpg', align = 'center'),
+          img(src='babypicture.jpg', alt = "This app will be an interactive baby names app.", width = 355, height = 355),
           
         ),
         #### Set up the Prerequisites Page ----
@@ -118,9 +118,9 @@ ui <- list(
         tabItem(
           tabName = "challenge",
           withMathJax(),
-          h2("Baby Names Checker"),
+          h2("Baby Names Graph"),
           sidebarLayout(
-            sidebarPanel(textInput('name', 'Enter the name of the baby you would like to see', 'Enter Name')),
+            sidebarPanel(textInput('name', 'Enter the name of the baby you would like to see a graph of', 'Enter Name')),
             mainPanel(plotOutput('trend'))
           )
         ),
@@ -137,10 +137,9 @@ ui <- list(
         tabItem(
           tabName = "game",
           withMathJax(),
-          h2("Practice/Test Yourself with [Type of Game]"),
-          p("On this type of page, you'll set up a game for the user to play.
-            Game types include Tic-Tac-Toe, Matching, and a version Hangman to
-            name a few. If you have ideas for new game type, please let us know.")
+          h2("baby names guesser"),
+          textInput('name1',"Guess the most popular female name in 1880", "Enter name here"), 
+          textOutput('babynumber')
         ),
         #### Set up a Wizard Page ----
         tabItem(
@@ -199,6 +198,18 @@ server <- function(input, output, session) {
   output$table <- DT::renderDataTable({
     babynames
   })
+  
+  # set up grading component 
+  output$babynumber <- renderIcon({
+    icon = ifelse(
+      test = input$name1 == "Mary", 
+      yes = "correct",
+      no = "incorrect"
+    )
+    width = 60
+    html = TRUE
+  })
+    
 }
 
 # Boast App Call ----
