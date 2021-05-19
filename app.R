@@ -4,9 +4,11 @@ library(shinydashboard)
 library(shinyBS)
 library(shinyWidgets)
 library(boastUtils)
+library(ggplot2)
+library(babynames)
+library(DT)
 
-# Load additional dependencies and setup functions
-# source("global.R")
+
 
 # Define UI for App ----
 ui <- list(
@@ -36,7 +38,7 @@ ui <- list(
         menuItem("Overview", tabName = "overview", icon = icon("dashboard")),
         menuItem("Prerequisites", tabName = "prerequisites", icon = icon("book")),
         menuItem("Explore", tabName = "explore", icon = icon("wpexplorer")),
-        menuItem("Challenge", tabName = "challenge", icon = icon("gears")),
+        menuItem("challenge", tabName = "challenge", icon = icon("gears")),
         menuItem("Game", tabName = "game", icon = icon("gamepad")),
         menuItem("Wizard", tabName = "wizard", icon = icon("hat-wizard")),
         menuItem("References", tabName = "references", icon = icon("leanpub"))
@@ -53,45 +55,9 @@ ui <- list(
         tabItem(
           tabName = "overview",
           withMathJax(),
-          h1("Sample Application for BOAST Apps"), # This should be the full name.
-          p("This is a sample Shiny application for BOAST. Remember, this page
-            will act like the front page (home page) of your app. Thus you will
-            want to have this page catch attention and describe (in general terms)
-            what the user can do in the rest of the app."),
-          h2("Instructions"),
-          p("This information will change depending on what you want to do."),
-          tags$ol(
-            tags$li("Review any prerequiste ideas using the Prerequistes tab."),
-            tags$li("Explore the Exploration Tab."),
-            tags$li("Challenge yourself."),
-            tags$li("Play the game to test how far you've come.")
-          ),
-          ##### Go Button--location will depend on your goals ----
-          div(
-            style = "text-align: center",
-            bsButton(
-              inputId = "go1",
-              label = "GO!",
-              size = "large",
-              icon = icon("bolt"),
-              style = "default"
-            )
-          ),
-          ##### Create two lines of space ----
-          br(),
-          br(),
-          h2("Acknowledgements"),
-          p(
-            "This version of the app was developed and coded by Neil J.
-            Hatfield  and Robert P. Carey, III.",
-            br(),
-            "We would like to extend a special thanks to the Shiny Program
-            Students.",
-            br(),
-            br(),
-            br(),
-            div(class = "updated", "Last Update: 5/19/2021 by NJH.")
-          )
+          h1("Baby Names App"),
+          img(src='baby.jpg', align = 'center'),
+          
         ),
         #### Set up the Prerequisites Page ----
         tabItem(
@@ -150,28 +116,22 @@ ui <- list(
         #### will be up to you and the goals for your app.
         #### Set up an Explore Page
         tabItem(
-          tabName = "explore",
-          withMathJax(),
-          h2("Explore the Concept"),
-          p("This page should include something for the user to do, the more
-            active and engaging, the better. The purpose of this page is to help
-            the user build a productive understanding of the concept your app
-            is dedicated to."),
-          p("Common elements include graphs, sliders, buttons, etc."),
-          p("The following comes from the NHST Caveats App:"),
-        ),
-        #### Set up a Challenge Page ----
-        tabItem(
           tabName = "challenge",
           withMathJax(),
-          h2("Challenge Yourself"),
-          p("The general intent of a Challenge page is to have the user take
-            what they learned in an Exploration and apply that knowledge in new
-            contexts/situations. In essence, to have them challenge their
-            understanding by testing themselves."),
-          p("What this page looks like will be up to you. Something you might
-            consider is to re-create the tools of the Exploration page and then
-            a list of questions for the user to then answer.")
+          h2("Baby Names Checker"),
+          sidebarLayout(
+            sidebarPanel(textInput('name', 'Enter the name of the baby you would like to see', 'Enter Name')),
+            mainPanel(plotOutput('trend'))
+          )
+        ),
+        #### Set up an explore Page ----
+        tabItem(
+          tabName = "explore",
+          withMathJax(),
+          h2("Baby Names Data Table"),
+          DT::dataTableOutput("table")
+          
+          
         ),
         #### Set up a Game Page ----
         tabItem(
@@ -229,6 +189,16 @@ server <- function(input, output, session) {
       )
     }
   )
+  # set up plot
+  output$trend <- renderPlot({
+    ggplot(subset(babynames, name == input$name)) +
+      geom_line(aes(x = year, y = prop, color = sex))
+  })
+  
+  # set up data table
+  output$table <- DT::renderDataTable({
+    babynames
+  })
 }
 
 # Boast App Call ----
